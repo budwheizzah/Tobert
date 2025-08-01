@@ -27,6 +27,12 @@ public class Enemy : Scroller
 	[SerializeField]
 	private float damageBlink = 0.1f;
 
+	[SerializeField]
+	private float trackingProbability = 0.15f;
+
+	[SerializeField]
+	private float trackingRate = 1f;
+
 	public AudioClip[] sounds;
 	public AudioClip[] damages;
 	public AudioClip[] deaths;
@@ -41,10 +47,44 @@ public class Enemy : Scroller
 	{
 		base.Start();
 
+		onOverflow += OnDodged;
+
+		float trackingDraw = Random.Range(0,1);
+		if (trackingDraw <= trackingProbability)
+		{
+			StartCoroutine(Tracking());
+		}
+
 		if (sounds.Length > 0)
 		{
 			StartCoroutine(Lifespan());
 		}
+	}
+
+	private IEnumerator Tracking()
+	{
+		while (!isDeceased)
+		{
+			if (Manager.Instance.gameState == Manager.GameState.Playing) 
+			{ 
+				if (transform.position.y < Player.Instance.gameObject.transform.position.y)
+				{
+					MoveY(trackingRate);
+				}
+				else if (transform.position.y > Player.Instance.gameObject.transform.position.y)
+				{
+					MoveY(-trackingRate);
+				}
+			}
+			yield return null;
+		}
+	}
+
+	private void MoveY(float value)
+	{
+		Vector3 tmpPos = transform.position;
+		tmpPos.y += value * Time.deltaTime;
+		transform.position = tmpPos;
 	}
 
 	private IEnumerator Lifespan()
@@ -83,6 +123,7 @@ public class Enemy : Scroller
 				Audio.Instance.EnemySound(deaths);
 			}
 			GetComponent<BoxCollider2D>().enabled = false;
+			Manager.Instance.AddKills(1);
 		}
 		else
 		{
@@ -121,5 +162,15 @@ public class Enemy : Scroller
 		{
 			Destroy(gameObject);
 		}
+	}
+
+	private void OnDodged()
+	{
+		Manager.Instance.AddDodges(1);
+	}
+
+	private void OnDestroy()
+	{
+		onOverflow -= OnDodged;
 	}
 }

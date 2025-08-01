@@ -1,7 +1,7 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Scroller : MonoBehaviour
 {
@@ -35,11 +35,13 @@ public class Scroller : MonoBehaviour
 
 	public bool isStopped = false;
 
+	public Action onOverflow;
+
 	private LocalLayer localLayer = LocalLayer.Nothing;
 
 	protected virtual void Start()
 	{
-		speedLocal = Random.Range(speedMinimum, speedMinimum + speedVariance);
+		speedLocal = UnityEngine.Random.Range(speedMinimum, speedMinimum + speedVariance);
 		StartCoroutine(ScrollObject());
 	}
 
@@ -54,6 +56,7 @@ public class Scroller : MonoBehaviour
 				transform.position = tmpPos;
 				if (tmpPos.x <= minimumHorizontal)
 				{
+					onOverflow?.Invoke();
 					Destroy(gameObject);
 				}
 			}

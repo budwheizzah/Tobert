@@ -59,6 +59,9 @@ public class Player : MonoBehaviour
 	private AudioClip[] audioDie;
 
 	[SerializeField]
+	private AudioClip[] audioReplenish;
+
+	[SerializeField]
 	private AudioClip audioWeapon;
 
 	[Header("Dimensions")]
@@ -69,9 +72,10 @@ public class Player : MonoBehaviour
 	private float horizontal = -4f;
 
 	public Action onOutOfGas;
-	public Action<float> onConsumeGas;
+	public Action<float> onUpdateGas;
 	public Action onStartGas;
 	public Action onEndGas;
+	public Action onReplenishGas;
 	public Action<int> onDamage;
 	public Action onFail;
 
@@ -88,7 +92,7 @@ public class Player : MonoBehaviour
 	{
 		MoveTo(vertical, horizontal);
 		flames.SetActive(false);
-		onConsumeGas?.Invoke(gas); // just report the initial gas amount to main
+		onUpdateGas?.Invoke(gas); // just report the initial gas amount to main
 		animate.isFrozen = false;
 	}
 
@@ -189,13 +193,14 @@ public class Player : MonoBehaviour
 		if (gas > 0)
 		{
 			flames.SetActive(true);
-			onConsumeGas?.Invoke(gas);
+			onUpdateGas?.Invoke(gas);
 			return true;
 		}
 		else
 		{
-			onOutOfGas?.Invoke();
 			gas = 0;
+			onUpdateGas?.Invoke(0);
+			onOutOfGas?.Invoke();
 			return false;
 		}
 	}
@@ -203,6 +208,11 @@ public class Player : MonoBehaviour
 	public void Replenish(float amount)
 	{
 		gas += amount;
+		if (audioReplenish.Length > 0)
+		{
+			Audio.Instance.EnemySound(audioReplenish); // Use enemy for multitrack
+		}
+		onUpdateGas?.Invoke(gas);
 	}
 
 	public float GetVertical()
@@ -273,6 +283,21 @@ public class Player : MonoBehaviour
 		{
 			Damage(enemy.damage);
 			enemy.Damage(damage);
+			return;
+		}
+
+		Pickup item = collision.gameObject.GetComponent<Pickup>();
+		if (item != null)
+		{
+			switch (item.pickupType)
+			{
+				case Pickup.PickupType.Gas:
+					Replenish(item.value);
+					Destroy(item.gameObject);
+					break;
+				// TBD health? Maybe not.
+			}
+			return;
 		}
 	}
 

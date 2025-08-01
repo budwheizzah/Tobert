@@ -30,7 +30,7 @@ public class Healthbar : MonoBehaviour
 		{
 			if (i >= hp)
 			{
-				images[i].color = new Color(0, 0, 0, 0.2f);
+				images[i].color = new Color(0, 0, 0, 0.65f);
 			}
 			else
 			{

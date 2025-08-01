@@ -1,14 +1,19 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Manager : MonoBehaviour
 {
 	public static Manager Instance;
+	public static bool skipIntro = false;
 
 	public enum GameState { Intro, Playing, Paused, Death };
 	public enum EnvtLayer { Background, Midground, Foreground, Road };
+
+	private const float fadeRate = 1f;
 
 	[Header("Speeds")]
 	[SerializeField]
@@ -43,6 +48,13 @@ public class Manager : MonoBehaviour
 	[SerializeField]
 	private float spawnEnVariance = 6f;
 
+	[Header("Pickup Values")]
+	[SerializeField]
+	private float spawnItemRate = 5f;
+
+	[SerializeField]
+	private float spawnItemVariance = 5f;
+
 	[Header("Characters")]
 	[SerializeField]
 	private Player bitche;
@@ -65,15 +77,37 @@ public class Manager : MonoBehaviour
 	[SerializeField]
 	private GameObject[] enemies;
 
+	[SerializeField]
+	private GameObject[] items;
+
 	[Header("UI")]
 	[SerializeField]
 	private Text gasLabel;
+
+	[SerializeField]
+	private Text killsLabel;
+
+	[SerializeField]
+	private Text dodgesLabel;
+
+	[SerializeField]
+	private Text timeLabel;
 
 	[SerializeField]
 	private GameObject gasDepleted;
 
 	[SerializeField]
 	private Healthbar healthBar;
+
+	[SerializeField]
+	private CanvasGroup gameGroup;
+
+	[SerializeField]
+	private CanvasGroup titleGroup;
+
+	[SerializeField]
+	private CanvasGroup deathGroup;
+
 
 	[Header("Audio")]
 	[SerializeField]
@@ -84,7 +118,7 @@ public class Manager : MonoBehaviour
 
 	[Header("Delays")]
 	[SerializeField]
-	private float startDelay = 3;
+	private float titleDelay = 1;
 
 	private List<GameObject> backgroundObjects;
 
@@ -94,12 +128,22 @@ public class Manager : MonoBehaviour
 
 	public bool isRunning = true;
 
+	private int kills = 0;
+	private int dodges = 0;
+
+	private int totalSeconds = 0;
+
 	private void Awake()
 	{
+		titleGroup.alpha = 1;
+		gameGroup.alpha = 0;
+		deathGroup.alpha = 0;
+
 		backgroundObjects = new List<GameObject>();
 		Instance = this;
 		bitche.onOutOfGas += AmmoDepleted;
-		bitche.onConsumeGas += AmmoConsume;
+		bitche.onUpdateGas += AmmoConsume;
+		bitche.onReplenishGas += AmmoReplenish;
 		bitche.onDamage += PlayerDamage;
 		bitche.onFail += PlayerFail;
 
@@ -110,18 +154,50 @@ public class Manager : MonoBehaviour
 	{
 		gasDepleted.SetActive(false);
 		Audio.Instance.BackgroundSound(themeSong);
+
+		if (skipIntro)
+		{
+			titleGroup.alpha = 0;
+			gameGroup.alpha = 1;
+		}
+
 		StartCoroutine(StartDelayed());
+	}
+
+	public void AddKills(int k)
+	{
+		kills += k;
+		killsLabel.text = kills.ToString();
+	}
+
+	public void AddDodges(int d)
+	{
+		dodges += d;
+		dodgesLabel.text = dodges.ToString();
 	}
 
 	private IEnumerator StartDelayed()
 	{
-		yield return new WaitForSeconds(startDelay);
+		if (!skipIntro)
+		{
+			while (!Input.anyKeyDown)
+			{
+				yield return null;
+			}
+
+			StartCoroutine(FadeCanvas(titleGroup, false));
+			StartCoroutine(FadeCanvas(gameGroup, true));
+		}
+
+		yield return new WaitForSeconds(titleDelay);
 
 		gameState = GameState.Playing;
 		bitche.animate.Play();
 
+		StartCoroutine(Timer());
 		StartCoroutine(SpawnBackground());
 		StartCoroutine(SpawnEnemies());
+		StartCoroutine(SpawnItems());
 		StartCoroutine(ScrollBackground());
 	}
 
@@ -168,12 +244,12 @@ public class Manager : MonoBehaviour
 		{
 			if (gameState == GameState.Playing)
 			{
-				float waitTime = Random.Range(spawnBgRate, spawnBgRate + spawnBgVariance);
+				float waitTime = UnityEngine.Random.Range(spawnBgRate, spawnBgRate + spawnBgVariance);
 				yield return new WaitForSeconds(waitTime);
 
-				int spawnIndex = Random.Range(0, trees.Length);
+				int spawnIndex = UnityEngine.Random.Range(0, trees.Length);
 				Vector3 spawnPosition = backgroundSpawn.transform.position;
-				spawnPosition.y = Random.Range(spawnPosition.y, spawnPosition.y + spawnBgHeightVariance);
+				spawnPosition.y = UnityEngine.Random.Range(spawnPosition.y, spawnPosition.y + spawnBgHeightVariance);
 				GameObject tree = Instantiate(trees[spawnIndex], spawnPosition, backgroundSpawn.transform.rotation);
 				backgroundObjects.Add(tree);
 			}
@@ -187,20 +263,46 @@ public class Manager : MonoBehaviour
 		{
 			if (gameState == GameState.Playing)
 			{
-				float waitTime = Random.Range(spawnEnRate, spawnEnRate + spawnEnVariance);
+				float waitTime = UnityEngine.Random.Range(spawnEnRate, spawnEnRate + spawnEnVariance);
 				yield return new WaitForSeconds(waitTime);
 
-				int spawnIndex = Random.Range(0, enemies.Length);
+				int spawnIndex = UnityEngine.Random.Range(0, enemies.Length);
 				Enemy e = enemies[spawnIndex].GetComponent<Enemy>();
 				if (e != null)
 				{
-					Vector3 spawnPosition = new Vector3(e.spawnHorizontal, Random.Range(e.spawnLowest, e.spawnLowest + e.spawnHeight), e.bitcheBehind);
-					spawnPosition.y = Random.Range(spawnPosition.y, spawnPosition.y);
+					Vector3 spawnPosition = new Vector3(e.spawnHorizontal, UnityEngine.Random.Range(e.spawnLowest, e.spawnLowest + e.spawnHeight), e.bitcheBehind);
+					spawnPosition.y = UnityEngine.Random.Range(spawnPosition.y, spawnPosition.y);
 					GameObject enemy = Instantiate(enemies[spawnIndex], spawnPosition, backgroundSpawn.transform.rotation);
 				}
 				else
 				{
 					Debug.LogError("Enemy spawn missing Enemy component");
+				}
+			}
+			yield return null;
+		}
+	}
+
+	private IEnumerator SpawnItems()
+	{
+		while (isRunning)
+		{
+			if (gameState == GameState.Playing)
+			{
+				float waitTime = UnityEngine.Random.Range(spawnItemRate, spawnItemRate + spawnItemVariance);
+				yield return new WaitForSeconds(waitTime);
+
+				int spawnIndex = UnityEngine.Random.Range(0, items.Length);
+				Pickup pu = items[spawnIndex].GetComponent<Pickup>();
+				if (pu != null)
+				{
+					Vector3 spawnPosition = new Vector3(pu.spawnHorizontal, UnityEngine.Random.Range(pu.spawnLowest, pu.spawnLowest + pu.spawnHeight), pu.bitcheBehind);
+					spawnPosition.y = UnityEngine.Random.Range(spawnPosition.y, spawnPosition.y);
+					GameObject item = Instantiate(items[spawnIndex], spawnPosition, backgroundSpawn.transform.rotation);
+				}
+				else
+				{
+					Debug.LogError("Item spawn missing Pickup component");
 				}
 			}
 			yield return null;
@@ -230,7 +332,8 @@ public class Manager : MonoBehaviour
 	private void OnDestroy()
 	{
 		bitche.onOutOfGas -= AmmoDepleted;
-		bitche.onConsumeGas -= AmmoConsume;
+		bitche.onUpdateGas -= AmmoConsume;
+		bitche.onReplenishGas -= AmmoReplenish;
 		bitche.onDamage -= PlayerDamage;
 		bitche.onFail -= PlayerFail;
 	}
@@ -249,13 +352,13 @@ public class Manager : MonoBehaviour
 	private void AmmoConsume(float amount)
 	{
 		//Debug.LogError("AMMO LEFT " + amount);
-		gasLabel.text = Mathf.Round(amount).ToString("0");
+		gasLabel.text = Mathf.Floor(amount).ToString("0");
 	}
 
-	private void AmmoReplenish(float amount)
+	private void AmmoReplenish()
 	{
 		//Debug.LogError("AMMO GIVE " + amount);
-		gasLabel.color = Color.white;
+		gasLabel.color = Color.black;
 	}
 
 	private void PlayerDamage(int remain)
@@ -268,12 +371,71 @@ public class Manager : MonoBehaviour
 		gameState = GameState.Death;
 
 		// Launch post mortem shit here
+		Audio.Instance.BackgroundSound(deathSong);
+		StartCoroutine(Die());
+	}
+
+	private IEnumerator Timer()
+	{
+		while (gameState != GameState.Death)
+		{
+			if (gameState == GameState.Playing)
+			{
+				TimeSpan timeSpan = TimeSpan.FromSeconds(totalSeconds);
+				timeLabel.text = timeSpan.ToString(@"hh\:mm\:ss");
+				totalSeconds++;
+			}
+			yield return new WaitForSeconds(1);
+		}
+	}
+
+	private IEnumerator Die()
+	{
+		//StartCoroutine(FadeCanvas(gameGroup, false));
+
+		yield return new WaitForSeconds(titleDelay);
+
+		StartCoroutine(FadeCanvas(deathGroup, true));
+
+		while (!Input.anyKey)
+		{
+			yield return null;
+		}
+
+		//Reload game
+		skipIntro = true;
+		SceneManager.LoadScene(0);
 	}
 
 	private IEnumerator DismissGasWarning()
 	{
 		yield return new WaitForSeconds(3);
 		gasDepleted.SetActive(false);
+	}
+
+	private IEnumerator FadeCanvas(CanvasGroup cg, bool show)
+	{
+		float incr = fadeRate;
+		if (!show)
+		{
+			incr = -incr;
+		}
+
+		float ca = cg.alpha + (incr * Time.deltaTime);
+		while ((ca > 0) && (ca < 1))
+		{
+			ca += incr * Time.deltaTime;
+			if (ca > 1)
+			{
+				ca = 1;
+			}
+			else if (ca < 0)
+			{
+				ca = 0;
+			}
+			cg.alpha = ca;
+			yield return null;
+		}
 	}
 
 }
