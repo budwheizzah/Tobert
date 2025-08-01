@@ -13,11 +13,23 @@ public class Animation : MonoBehaviour
 	[SerializeField]
 	private SpriteRenderer me;
 
+	[SerializeField]
+	private bool startOnLaunch = true;
+
 	private int frame = 0;
 
 	public bool isFrozen = false;
 
+
 	private void Start()
+	{
+		if (startOnLaunch)
+		{
+			Play();
+		}
+	}
+
+	public void Play()
 	{
 		StartCoroutine(animateFrames());
 	}

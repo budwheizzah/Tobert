@@ -7,7 +7,7 @@ public class Manager : MonoBehaviour
 {
 	public static Manager Instance;
 
-	public enum GameState { Playing, Paused };
+	public enum GameState { Intro, Playing, Paused, Death };
 	public enum EnvtLayer { Background, Midground, Foreground, Road };
 
 	[Header("Speeds")]
@@ -72,11 +72,25 @@ public class Manager : MonoBehaviour
 	[SerializeField]
 	private GameObject gasDepleted;
 
+	[SerializeField]
+	private Healthbar healthBar;
+
+	[Header("Audio")]
+	[SerializeField]
+	private AudioClip themeSong;
+
+	[SerializeField]
+	private AudioClip deathSong;
+
+	[Header("Delays")]
+	[SerializeField]
+	private float startDelay = 3;
+
 	private List<GameObject> backgroundObjects;
 
 	private float basicRate = 0.5f; //offset per second
 
-	public GameState gameState = GameState.Playing;
+	public GameState gameState = GameState.Intro;
 
 	public bool isRunning = true;
 
@@ -86,14 +100,29 @@ public class Manager : MonoBehaviour
 		Instance = this;
 		bitche.onOutOfGas += AmmoDepleted;
 		bitche.onConsumeGas += AmmoConsume;
+		bitche.onDamage += PlayerDamage;
+		bitche.onFail += PlayerFail;
+
+		healthBar.Initialize(bitche.hp);
 	}
 
 	private void Start()
 	{
-		StartCoroutine(ScrollBackground());
+		gasDepleted.SetActive(false);
+		Audio.Instance.BackgroundSound(themeSong);
+		StartCoroutine(StartDelayed());
+	}
+
+	private IEnumerator StartDelayed()
+	{
+		yield return new WaitForSeconds(startDelay);
+
+		gameState = GameState.Playing;
+		bitche.animate.Play();
+
 		StartCoroutine(SpawnBackground());
 		StartCoroutine(SpawnEnemies());
-		gasDepleted.SetActive(false);
+		StartCoroutine(ScrollBackground());
 	}
 
 	private void MoveObjects(List<GameObject> move)
@@ -202,6 +231,8 @@ public class Manager : MonoBehaviour
 	{
 		bitche.onOutOfGas -= AmmoDepleted;
 		bitche.onConsumeGas -= AmmoConsume;
+		bitche.onDamage -= PlayerDamage;
+		bitche.onFail -= PlayerFail;
 	}
 
 	private void AmmoDepleted()
@@ -225,6 +256,18 @@ public class Manager : MonoBehaviour
 	{
 		//Debug.LogError("AMMO GIVE " + amount);
 		gasLabel.color = Color.white;
+	}
+
+	private void PlayerDamage(int remain)
+	{
+		healthBar.SetHealth(remain);
+	}
+
+	private void PlayerFail()
+	{
+		gameState = GameState.Death;
+
+		// Launch post mortem shit here
 	}
 
 	private IEnumerator DismissGasWarning()

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5304181078825128960}
   - component: {fileID: 8184786000053609976}
   - component: {fileID: 3072645538243864059}
+  - component: {fileID: 2838014636402964548}
   m_Layer: 0
   m_Name: Crow01
   m_TagString: Untagged
@@ -102,12 +103,32 @@ MonoBehaviour:
   minimumHorizontal: -10
   spawnHorizontal: 10
   spawnLowest: -4
-  spawnHeight: 4
-  speedMinimum: 3
-  speedVariance: 6
+  spawnHeight: 4.5
+  speedMinimum: 1
+  speedVariance: 4
   bitcheBehind: -0.04
   bitcheFront: -0.06
   isStopped: 0
+  spriteRenderer: {fileID: 5902846707486445928}
+  soundInterval: 0.4
+  intervalVariance: 1
+  deathDelay: 3
+  damageDelay: 0.2
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  damageBlink: 0.05
+  sounds:
+  - {fileID: 8300000, guid: 326e3b8d16bffca4286c76b2aaf297ce, type: 3}
+  - {fileID: 8300000, guid: c75cc0995f0777e4a88382f6994295a6, type: 3}
+  - {fileID: 8300000, guid: 9991f8f2b7556d84481d5b16cb90aa64, type: 3}
+  - {fileID: 8300000, guid: 75e8833e9a1515b459b9695b1217ccb0, type: 3}
+  - {fileID: 8300000, guid: 251e22ba544d7af4eb6da477dc31b192, type: 3}
+  - {fileID: 8300000, guid: af63c1b74cf170e4da2c734bd11e2458, type: 3}
+  - {fileID: 8300000, guid: 7d183e18e5ae22446ba7c3e29988970f, type: 3}
+  - {fileID: 8300000, guid: b11a8ebfae45dd64fa8c6dac3bd97faa, type: 3}
+  damages: []
+  deaths: []
+  damage: 1
+  hp: 1
 --- !u!114 &8184786000053609976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -155,10 +176,10 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -1.11, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -169,5 +190,32 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 7, y: 3}
+  m_Size: {x: 4, y: 1}
   m_EdgeRadius: 0
+--- !u!50 &2838014636402964548
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1370213968757003646}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 0.0001
+  m_LinearDrag: 0
+  m_AngularDrag: 0
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 7
