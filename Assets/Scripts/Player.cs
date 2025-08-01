@@ -212,6 +212,7 @@ public class Player : MonoBehaviour
 		{
 			Audio.Instance.EnemySound(audioReplenish); // Use enemy for multitrack
 		}
+		onReplenishGas?.Invoke();
 		onUpdateGas?.Invoke(gas);
 	}
 

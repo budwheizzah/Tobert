@@ -3146,10 +3146,10 @@ MonoBehaviour:
   playerSound: {fileID: 2026181659}
   backgroundSound: {fileID: 2026181656}
   weaponSound: {fileID: 2026181660}
-  backgroundVolume: 0.255
-  playerVolume: 0.344
-  enemyVolume: 0.402
-  weaponVolume: 0.34
+  backgroundVolume: 0.25
+  playerVolume: 0.35
+  enemyVolume: 0.4
+  weaponVolume: 0.35
   enemyTracks: 4
 --- !u!82 &2026181659
 AudioSource:
