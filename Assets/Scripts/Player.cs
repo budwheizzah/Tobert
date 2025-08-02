@@ -72,6 +72,9 @@ public class Player : MonoBehaviour
 	[SerializeField]
 	private AudioClip audioWeapon;
 
+	[SerializeField]
+	private Sprite deathImage;
+
 
 	[Header("Dimensions")]
 	[SerializeField,Tooltip("Offset to apply when reporting Y position to other scripts through GetVertical()")]
@@ -133,25 +136,25 @@ public class Player : MonoBehaviour
 
 	private void processInputs()
 	{
-		if (Input.GetKey(KeyCode.W))
+		if (Input.GetKey(KeyCode.W) || Controls.Instance.ButtonTouch(Controls.ButtonType.Up))
 		{
 			Vertical(true);
 		}
-		else if (Input.GetKey(KeyCode.S))
+		else if (Input.GetKey(KeyCode.S) || Controls.Instance.ButtonTouch(Controls.ButtonType.Down))
 		{
 			Vertical();
 		}
 
-		if (Input.GetKey(KeyCode.A))
+		if (Input.GetKey(KeyCode.A) || Controls.Instance.ButtonTouch(Controls.ButtonType.Left))
 		{
 			Horizontal();
 		}
-		else if (Input.GetKey(KeyCode.D))
+		else if (Input.GetKey(KeyCode.D) || Controls.Instance.ButtonTouch(Controls.ButtonType.Right))
 		{
 			Horizontal(true);
 		}
 
-		if (Input.GetKey(KeyCode.Space))
+		if (Input.GetKey(KeyCode.Space) || Controls.Instance.ButtonTouch(Controls.ButtonType.Fire))
 		{
 			isFiring = Fire();
 		}
@@ -245,7 +248,7 @@ public class Player : MonoBehaviour
 			{
 				Audio.Instance.PlayerSound(audioDie);
 			}
-
+			spriteRenderer.sprite = deathImage;
 			onFail?.Invoke();
 			animate.isFrozen = true;
 		}

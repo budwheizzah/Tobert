@@ -1,12 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Manager : MonoBehaviour
 {
+	[DllImport("__Internal")]
+	private static extern bool IsMobile();
+
 	public static Manager Instance;
 	public static bool skipIntro = false;
 
@@ -120,6 +124,8 @@ public class Manager : MonoBehaviour
 	[SerializeField]
 	private CanvasGroup deathGroup;
 
+	[SerializeField]
+	private GameObject[] mobileControlsOverlay;
 
 	[Header("Audio")]
 	[SerializeField]
@@ -149,6 +155,13 @@ public class Manager : MonoBehaviour
 
 	private void Awake()
 	{
+		if (!DetectMobile())
+		{
+			for (int x = 0; x< mobileControlsOverlay.Length; x++)
+			{
+				mobileControlsOverlay[x].SetActive(false);
+			}
+		}
 		titleGroup.alpha = 1;
 		gameGroup.alpha = 0;
 		deathGroup.alpha = 0;
@@ -209,7 +222,7 @@ public class Manager : MonoBehaviour
 	{
 		if (!skipIntro)
 		{
-			while ((!Input.GetMouseButton(0)) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
+			while ((!Input.anyKey) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
 			{
 				yield return null;
 			}
@@ -509,6 +522,14 @@ public class Manager : MonoBehaviour
 			cg.alpha = ca;
 			yield return null;
 		}
+	}
+
+	private bool DetectMobile()
+	{
+#if !UNITY_EDITOR && UNITY_WEBGL
+         return IsMobile();
+#endif
+		return false;
 	}
 
 }

@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 859814523025751358}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.433, y: -0.065999985, z: -0.05}
+  m_LocalPosition: {x: 0.337, y: -0.025, z: -0.05}
   m_LocalScale: {x: 0.5453801, y: 0.5453801, z: 0.5453801}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -158,7 +158,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: a46402c1738e73440a0f6f6068576b0f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a06967df964493349b65a22429669e20, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -183,13 +183,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animTime: 0.1
   frames:
-  - {fileID: 21300000, guid: a46402c1738e73440a0f6f6068576b0f, type: 3}
-  - {fileID: 21300000, guid: c0e6a3713f8c11c4bad56db779ee33d6, type: 3}
-  - {fileID: 21300000, guid: f1204bb67b36afc42b8bb4866bda8700, type: 3}
-  - {fileID: 21300000, guid: 5aab37ace63e8ae4eb2d1793554397cd, type: 3}
-  - {fileID: 21300000, guid: 9d742d4b6dfc8c3479d33792614d25ff, type: 3}
-  - {fileID: 21300000, guid: 8f443e4141c72524291b8ab44b8ce7af, type: 3}
-  - {fileID: 21300000, guid: 7a9ee81dad9e4a44a81a9b2ed9cbbd60, type: 3}
+  - {fileID: 21300000, guid: a06967df964493349b65a22429669e20, type: 3}
+  - {fileID: 21300000, guid: bcb76067f74188c498c936cc35b54694, type: 3}
+  - {fileID: 21300000, guid: 1b7c3690ca3cd8c4c9b14c2d54925b22, type: 3}
+  - {fileID: 21300000, guid: 34e0a1e1a5ae6da42b056ee71b171e5c, type: 3}
   me: {fileID: 2779155545645040752}
   startOnLaunch: 0
   isFrozen: 0
@@ -299,6 +296,7 @@ MonoBehaviour:
   audioPipebomb:
   - {fileID: 8300000, guid: 8dfbcad8698fd8e4585e2921edbbfcd0, type: 3}
   audioWeapon: {fileID: 8300000, guid: ccd4d9b8e91c98c46ab2f91f626d2e18, type: 3}
+  deathImage: {fileID: 21300000, guid: d61ee37082c344f4b8aab89111963d1a, type: 3}
   offsetVertical: 0.5
 --- !u!61 &1882274307464719684
 BoxCollider2D:
@@ -343,7 +341,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.7, y: 0.4}
+  m_Size: {x: 0.8, y: 0.5}
   m_EdgeRadius: 0
 --- !u!50 &8380248180190750351
 Rigidbody2D:
@@ -401,7 +399,7 @@ Transform:
   m_GameObject: {fileID: 7736054685371808992}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.975, y: 0.03999996, z: -0.010000002}
+  m_LocalPosition: {x: 1.905, y: 0.03999996, z: -0.010000002}
   m_LocalScale: {x: 0.15, y: 0.15, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
