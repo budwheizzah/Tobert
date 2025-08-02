@@ -268,7 +268,7 @@ public class Manager : MonoBehaviour
 			{
 				Vector2 currentOffset = road.material.mainTextureOffset;
 				currentOffset.x += GetSpeed(EnvtLayer.Road);
-				if (currentOffset.x > 1f)
+				if (currentOffset.x > 2f)
 				{
 					currentOffset.x = 0;
 				}

@@ -96,12 +96,14 @@ public class Enemy : Scroller
 			Audio.Instance.EnemySound(sounds);
 		}
 
-		// If bitche dies, wait and then destroy
+		// If bitche dies, wait and then destroy (or not actually)
+		/*
 		if (Manager.Instance.gameState == Manager.GameState.Death)
 		{
 			yield return new WaitForSeconds(deathDelay);
 			Destroy(gameObject);
 		}
+		*/
 	}
 
 	public void Damage(int hit)
