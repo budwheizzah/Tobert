@@ -723,6 +723,7 @@ MonoBehaviour:
   spawnEnVariance: 1.5
   spawnItemRate: 5
   spawnItemVariance: 5
+  slowdownRate: 0.3
   bitche: {fileID: 101796434222526263}
   background: {fileID: 879229429}
   road: {fileID: 182550872}
@@ -735,6 +736,8 @@ MonoBehaviour:
   - {fileID: 1370213968757003646, guid: 92dad7fec9e97044fbe0ef122294e525, type: 3}
   items:
   - {fileID: 2230237641816451606, guid: 2d988cfe136ecc44194fcad542eaa6ba, type: 3}
+  - {fileID: 1844794738124953793, guid: 589dafe5044ea514b8d79e02520ca9f1, type: 3}
+  - {fileID: 2230237641816451606, guid: 5c377ef2a94ea774dbe211655f4d3d80, type: 3}
   gasLabel: {fileID: 1549462542}
   killsLabel: {fileID: 834569934}
   dodgesLabel: {fileID: 1755151898}
@@ -2976,6 +2979,7 @@ MonoBehaviour:
   playerSound: {fileID: 2026181659}
   backgroundSound: {fileID: 2026181656}
   weaponSound: {fileID: 2026181660}
+  masterVolume: 1
   backgroundVolume: 0.25
   playerVolume: 0.35
   enemyVolume: 0.4

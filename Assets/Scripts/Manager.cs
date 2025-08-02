@@ -11,7 +11,7 @@ public class Manager : MonoBehaviour
 	public static bool skipIntro = false;
 
 	public enum GameState { Intro, Playing, Paused, Death };
-	public enum EnvtLayer { Background, Midground, Foreground, Road };
+	public enum EnvtLayer { Background, Midground, Foreground, Road, MultiplierOnly };
 
 	private const float fadeRate = 1f;
 
@@ -54,6 +54,9 @@ public class Manager : MonoBehaviour
 
 	[SerializeField]
 	private float spawnItemVariance = 5f;
+
+	[SerializeField]
+	private float slowdownRate = 0.3f;
 
 	[Header("Characters")]
 	[SerializeField]
@@ -133,6 +136,8 @@ public class Manager : MonoBehaviour
 
 	private int totalSeconds = 0;
 
+	private float speedMultiplier = 1f;
+
 	private void Awake()
 	{
 		titleGroup.alpha = 1;
@@ -144,7 +149,7 @@ public class Manager : MonoBehaviour
 		bitche.onOutOfGas += AmmoDepleted;
 		bitche.onUpdateGas += AmmoConsume;
 		bitche.onReplenishGas += AmmoReplenish;
-		bitche.onDamage += PlayerDamage;
+		bitche.onHealth += PlayerHealth;
 		bitche.onFail += PlayerFail;
 
 		healthBar.Initialize(bitche.hp);
@@ -311,22 +316,25 @@ public class Manager : MonoBehaviour
 
 	public float GetSpeed(EnvtLayer speedLayer)
 	{
+		float localRate = speedMultiplier * currentSpeed * Time.deltaTime;
 		switch (speedLayer)
 		{
 			case EnvtLayer.Background:
-				return basicRate * backgroundRate * currentSpeed * Time.deltaTime;
+				return basicRate * backgroundRate * localRate;
 				break;
 			case EnvtLayer.Midground:
-				return basicRate * midgroundRate * currentSpeed * Time.deltaTime;
+				return basicRate * midgroundRate * localRate;
 				break;
 			case EnvtLayer.Foreground:
-				return basicRate * foregroundRate * currentSpeed * Time.deltaTime;
+				return basicRate * foregroundRate * localRate;
 				break;
-
+			case EnvtLayer.MultiplierOnly:
+				return speedMultiplier;
+				break;
 		}
 
 		// The default is the scrolling road, the baseRate
-		return basicRate * currentSpeed * Time.deltaTime;
+		return basicRate * localRate;
 	}
 
 	private void OnDestroy()
@@ -334,7 +342,7 @@ public class Manager : MonoBehaviour
 		bitche.onOutOfGas -= AmmoDepleted;
 		bitche.onUpdateGas -= AmmoConsume;
 		bitche.onReplenishGas -= AmmoReplenish;
-		bitche.onDamage -= PlayerDamage;
+		bitche.onHealth -= PlayerHealth;
 		bitche.onFail -= PlayerFail;
 	}
 
@@ -361,7 +369,7 @@ public class Manager : MonoBehaviour
 		gasLabel.color = Color.black;
 	}
 
-	private void PlayerDamage(int remain)
+	private void PlayerHealth(int remain)
 	{
 		healthBar.SetHealth(remain);
 	}
@@ -373,6 +381,26 @@ public class Manager : MonoBehaviour
 		// Launch post mortem shit here
 		Audio.Instance.BackgroundSound(deathSong);
 		StartCoroutine(Die());
+	}
+
+	public void TimedPickup(Pickup.PickupType pt, int duration)
+	{
+		StartCoroutine(TimedPickupLifespan(pt, duration));
+	}
+
+	private IEnumerator TimedPickupLifespan(Pickup.PickupType pt, int duration)
+	{
+		switch(pt)
+		{
+			case Pickup.PickupType.Slowdown:
+				speedMultiplier = slowdownRate;
+				Audio.Instance.UpdateRate(speedMultiplier);
+				yield return new WaitForSeconds(duration);
+				speedMultiplier = 1;
+				Audio.Instance.UpdateRate(speedMultiplier);
+				break;
+		}
+		yield return null;
 	}
 
 	private IEnumerator Timer()
@@ -406,6 +434,8 @@ public class Manager : MonoBehaviour
 		skipIntro = true;
 		SceneManager.LoadScene(0);
 	}
+
+
 
 	private IEnumerator DismissGasWarning()
 	{

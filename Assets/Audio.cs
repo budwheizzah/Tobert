@@ -17,6 +17,9 @@ public class Audio : MonoBehaviour
 	[SerializeField]
 	private AudioSource weaponSound;
 
+	[SerializeField, Range(0, 1)]
+	private float masterVolume = 1f;
+
 	[SerializeField, Range(0,1)]
 	private float backgroundVolume = 0.5f;
 
@@ -34,11 +37,19 @@ public class Audio : MonoBehaviour
 
 	private int enemyTrack = 0;
 
+	private float lastMasterVolume = 0f;
+
 	private List<AudioSource> enemySources = new List<AudioSource>();
 
 	private void Awake()
 	{
 		Instance = this;
+
+		masterVolume = PlayerPrefs.GetFloat("volumeMaster", masterVolume);
+		backgroundVolume = PlayerPrefs.GetFloat("volumeBackground", backgroundVolume);
+		enemyVolume = PlayerPrefs.GetFloat("volumeEnemies", enemyVolume);
+		playerVolume = PlayerPrefs.GetFloat("volumePlayer", playerVolume);
+		weaponVolume = PlayerPrefs.GetFloat("volumePlayer", weaponVolume);
 
 		for (int i =0; i < enemyTracks; i++)
 		{
@@ -46,9 +57,51 @@ public class Audio : MonoBehaviour
 		}
 	}
 
+	private void Update()
+	{
+		if (lastMasterVolume != masterVolume)
+		{
+			UpdateVolume();
+			lastMasterVolume = masterVolume;
+		}
+	}
+
+	public void UpdateVolume()
+	{
+		for (int i = 0; i < enemyTracks; i++)
+		{
+			enemySources[i].volume = masterVolume * enemyVolume;
+		}
+
+		backgroundSound.volume = masterVolume * backgroundVolume;
+		weaponSound.volume = masterVolume * weaponVolume;
+		playerSound.volume = masterVolume * playerVolume;
+
+		PlayerPrefs.SetFloat("volumeMaster", masterVolume);
+		PlayerPrefs.SetFloat("volumeBackground", backgroundVolume);
+		PlayerPrefs.SetFloat("volumeEnemies", enemyVolume);
+		PlayerPrefs.SetFloat("volumePlayer", playerVolume);
+		PlayerPrefs.SetFloat("volumeWeapon", weaponVolume);
+
+		PlayerPrefs.Save();
+	}
+
+	public void UpdateRate(float rate)
+	{
+		for (int i = 0; i < enemyTracks; i++)
+		{
+			enemySources[i].pitch = rate;
+		}
+
+		backgroundSound.pitch = rate;
+		// Leave these out of slowdowns
+		// weaponSound.volume = masterVolume * weaponVolume;
+		// playerSound.volume = masterVolume * playerVolume;
+	}
+
 	public void BackgroundSound(AudioClip ac)
 	{
-		backgroundSound.volume = backgroundVolume;
+		backgroundSound.volume = masterVolume * backgroundVolume;
 		PlayInterrupt(backgroundSound, ac);
 	}
 
@@ -59,19 +112,19 @@ public class Audio : MonoBehaviour
 			weaponSound.Stop();
 			return;
 		}
-		weaponSound.volume = weaponVolume;
+		weaponSound.volume = masterVolume * weaponVolume;
 		PlayInterrupt(weaponSound, ac);
 	}
 
 	public void PlayerSound(AudioClip[] aca)
 	{
-		playerSound.volume = playerVolume;
+		playerSound.volume = masterVolume * playerVolume;
 		RandomizeSource(playerSound, aca);
 	}
 
 	public void EnemySound(AudioClip[] aca)
 	{
-		enemySources[enemyTrack].volume = enemyVolume;
+		enemySources[enemyTrack].volume = masterVolume * enemyVolume;
 		RandomizeSource(enemySources[enemyTrack], aca);
 		enemyTrack++;
 		if (enemyTrack >= enemySources.Count)

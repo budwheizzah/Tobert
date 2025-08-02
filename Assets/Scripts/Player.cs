@@ -8,7 +8,12 @@ public class Player : MonoBehaviour
 	public static Player Instance;
 
 	[Header("Player values")]
+	[SerializeField]
+	private int maxhp = 3;
+
+	[HideInInspector]
 	public int hp = 3;
+	
 	public int damage = 1;
 
 	[SerializeField]
@@ -76,7 +81,7 @@ public class Player : MonoBehaviour
 	public Action onStartGas;
 	public Action onEndGas;
 	public Action onReplenishGas;
-	public Action<int> onDamage;
+	public Action<int> onHealth;
 	public Action onFail;
 
 	private bool isDamaging = false;
@@ -86,6 +91,7 @@ public class Player : MonoBehaviour
 	private void Awake()
 	{
 		Instance = this;
+		hp = maxhp;
 	}
 
 	private void Start()
@@ -189,7 +195,7 @@ public class Player : MonoBehaviour
 
 	private bool Fire()
 	{
-		gas -= Time.deltaTime * gasRate;
+		gas -= Time.deltaTime * gasRate * Manager.Instance.GetSpeed(Manager.EnvtLayer.MultiplierOnly);
 		if (gas > 0)
 		{
 			flames.SetActive(true);
@@ -208,10 +214,6 @@ public class Player : MonoBehaviour
 	public void Replenish(float amount)
 	{
 		gas += amount;
-		if (audioReplenish.Length > 0)
-		{
-			Audio.Instance.EnemySound(audioReplenish); // Use enemy for multitrack
-		}
 		onReplenishGas?.Invoke();
 		onUpdateGas?.Invoke(gas);
 	}
@@ -252,7 +254,22 @@ public class Player : MonoBehaviour
 		}
 
 		StartCoroutine(DamageRoutine());
-		onDamage?.Invoke(hp);
+		onHealth?.Invoke(hp);
+	}
+
+	private bool Heal(int value)
+	{
+		hp += value;
+		if (hp > maxhp)
+		{
+			hp = maxhp;
+			return false;
+		}
+		else
+		{
+			onHealth?.Invoke(hp);
+			return true;
+		}
 	}
 
 	private IEnumerator DamageRoutine()
@@ -290,14 +307,31 @@ public class Player : MonoBehaviour
 		Pickup item = collision.gameObject.GetComponent<Pickup>();
 		if (item != null)
 		{
+			bool collectedPickup = true;
 			switch (item.pickupType)
 			{
+				case Pickup.PickupType.Slowdown:
+					Manager.Instance.TimedPickup(item.pickupType, item.value);
+					break;
 				case Pickup.PickupType.Gas:
 					Replenish(item.value);
-					Destroy(item.gameObject);
 					break;
-				// TBD health? Maybe not.
+				case Pickup.PickupType.Health:
+					// Health can be maxed
+					collectedPickup = Heal(item.value);
+					break;
+
 			}
+
+			if (collectedPickup)
+			{
+				if (audioReplenish.Length > 0)
+				{
+					Audio.Instance.EnemySound(audioReplenish); // Use enemy for multitrack
+				}
+				Destroy(item.gameObject);
+			}
+			
 			return;
 		}
 	}
