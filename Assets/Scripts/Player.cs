@@ -248,6 +248,8 @@ public class Player : MonoBehaviour
 			{
 				Audio.Instance.PlayerSound(audioDie);
 			}
+			flames.SetActive(false);
+			Audio.Instance.WeaponSound();
 			spriteRenderer.sprite = deathImage;
 			onFail?.Invoke();
 			animate.isFrozen = true;
