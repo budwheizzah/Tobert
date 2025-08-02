@@ -274,6 +274,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e9e0813e5f716e479492595599542e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxhp: 3
   hp: 3
   damage: 1
   damageDelay: 0.8
@@ -295,6 +296,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: c65c8afef022108439a381f4bfed93e7, type: 3}
   audioReplenish:
   - {fileID: 8300000, guid: 388efe751a1da8240a05e36dfdc3a0ec, type: 3}
+  audioPipebomb:
+  - {fileID: 8300000, guid: 8dfbcad8698fd8e4585e2921edbbfcd0, type: 3}
   audioWeapon: {fileID: 8300000, guid: ccd4d9b8e91c98c46ab2f91f626d2e18, type: 3}
   offsetVertical: 0.5
 --- !u!61 &1882274307464719684

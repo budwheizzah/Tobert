@@ -69,6 +69,12 @@ public class Manager : MonoBehaviour
 	[SerializeField]
 	private SpriteRenderer road;
 
+	[SerializeField]
+	private GameObject pipebomb;
+
+	[SerializeField]
+	private Animation pipebombAnimate;
+
 	[Header("Slots")]
 	[SerializeField]
 	private GameObject backgroundSpawn;
@@ -95,6 +101,9 @@ public class Manager : MonoBehaviour
 
 	[SerializeField]
 	private Text timeLabel;
+
+	[SerializeField]
+	private Text[] volumeLabel;
 
 	[SerializeField]
 	private GameObject gasDepleted;
@@ -144,6 +153,8 @@ public class Manager : MonoBehaviour
 		gameGroup.alpha = 0;
 		deathGroup.alpha = 0;
 
+		pipebomb.SetActive(false);
+
 		backgroundObjects = new List<GameObject>();
 		Instance = this;
 		bitche.onOutOfGas += AmmoDepleted;
@@ -158,6 +169,7 @@ public class Manager : MonoBehaviour
 	private void Start()
 	{
 		gasDepleted.SetActive(false);
+		Audio.Instance.onUpdateVolume += UpdateVolume;
 		Audio.Instance.BackgroundSound(themeSong);
 
 		if (skipIntro)
@@ -167,6 +179,18 @@ public class Manager : MonoBehaviour
 		}
 
 		StartCoroutine(StartDelayed());
+	}
+
+	private void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.LeftArrow))
+		{
+			Audio.Instance.VaryVolume(-0.05f);
+		}
+		else if (Input.GetKeyDown(KeyCode.RightArrow))
+		{
+			Audio.Instance.VaryVolume(0.05f);
+		}
 	}
 
 	public void AddKills(int k)
@@ -185,7 +209,7 @@ public class Manager : MonoBehaviour
 	{
 		if (!skipIntro)
 		{
-			while (!Input.anyKeyDown)
+			while ((!Input.GetMouseButton(0)) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
 			{
 				yield return null;
 			}
@@ -344,6 +368,15 @@ public class Manager : MonoBehaviour
 		bitche.onReplenishGas -= AmmoReplenish;
 		bitche.onHealth -= PlayerHealth;
 		bitche.onFail -= PlayerFail;
+		Audio.Instance.onUpdateVolume -= UpdateVolume;
+	}
+
+	private void UpdateVolume(float volume)
+	{
+		foreach (Text vl in volumeLabel)
+		{
+			vl.text = (volume * 100).ToString("0");
+		}
 	}
 
 	private void AmmoDepleted()
@@ -442,6 +475,16 @@ public class Manager : MonoBehaviour
 		yield return new WaitForSeconds(3);
 		gasDepleted.SetActive(false);
 	}
+
+	public IEnumerator FirePipebomb(float duration)
+	{
+		pipebomb.SetActive(true);
+		pipebombAnimate.Play();
+		yield return new WaitForSeconds(duration);
+		pipebombAnimate.Stop();
+		pipebomb.SetActive(false);
+	}
+
 
 	private IEnumerator FadeCanvas(CanvasGroup cg, bool show)
 	{

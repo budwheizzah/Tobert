@@ -67,7 +67,11 @@ public class Player : MonoBehaviour
 	private AudioClip[] audioReplenish;
 
 	[SerializeField]
+	private AudioClip[] audioPipebomb;
+
+	[SerializeField]
 	private AudioClip audioWeapon;
+
 
 	[Header("Dimensions")]
 	[SerializeField,Tooltip("Offset to apply when reporting Y position to other scripts through GetVertical()")]
@@ -320,14 +324,21 @@ public class Player : MonoBehaviour
 					// Health can be maxed
 					collectedPickup = Heal(item.value);
 					break;
+				case Pickup.PickupType.Pipebomb:
+					if (audioPipebomb.Length > 0)
+					{
+						Audio.Instance.AuxiliarySound(audioPipebomb);
+					}
 
+					StartCoroutine(Manager.Instance.FirePipebomb(item.value));
+					break;
 			}
 
 			if (collectedPickup)
 			{
 				if (audioReplenish.Length > 0)
 				{
-					Audio.Instance.EnemySound(audioReplenish); // Use enemy for multitrack
+					Audio.Instance.AuxiliarySound(audioReplenish);
 				}
 				Destroy(item.gameObject);
 			}

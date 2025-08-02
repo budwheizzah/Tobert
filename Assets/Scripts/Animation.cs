@@ -20,7 +20,6 @@ public class Animation : MonoBehaviour
 
 	public bool isFrozen = false;
 
-
 	private void Start()
 	{
 		if (startOnLaunch)
@@ -31,14 +30,20 @@ public class Animation : MonoBehaviour
 
 	public void Play()
 	{
+		Stop();
 		StartCoroutine(animateFrames());
+	}
+
+	public void Stop()
+	{
+		StopAllCoroutines();
 	}
 
 	private IEnumerator animateFrames()
 	{
 		while (Manager.Instance.isRunning)
 		{
-			if ((Manager.Instance.gameState == Manager.GameState.Playing) && (!isFrozen))
+			if ((Manager.Instance.gameState == Manager.GameState.Playing) && (!isFrozen) && (gameObject.activeInHierarchy))
 			{
 				me.sprite = frames[frame];
 				frame++;
