@@ -24,10 +24,10 @@ public class Manager : MonoBehaviour
 	private float currentSpeed = 0;
 
 	[SerializeField]
-	private float backgroundRate = 3f; // This is a strange offset to position conversion, so number shall vary
+	private float backgroundRate = 0.2f; // This is a strange offset to position conversion, so number shall vary
 
 	[SerializeField]
-	private float midgroundRate = 5f; // elements between game and background
+	private float midgroundRate = 3f; // elements between game and background
 
 	[SerializeField]
 	private float foregroundRate = 6f; // enemies and such
@@ -68,7 +68,7 @@ public class Manager : MonoBehaviour
 
 	[Header("Elements")]
 	[SerializeField]
-	private GameObject background;
+	private SpriteRenderer background;
 
 	[SerializeField]
 	private SpriteRenderer road;
@@ -249,7 +249,7 @@ public class Manager : MonoBehaviour
 		{
 			GameObject bgo = move[x];
 			Vector2 tmpPos = bgo.transform.position;
-			tmpPos.x -= GetSpeed(EnvtLayer.Background);
+			tmpPos.x -= GetSpeed(EnvtLayer.Midground);
 			bgo.transform.position = tmpPos;
 			if (tmpPos.x <= spawnMinimumX)
 			{
@@ -273,6 +273,15 @@ public class Manager : MonoBehaviour
 					currentOffset.x = 0;
 				}
 				road.material.mainTextureOffset = currentOffset;
+
+				currentOffset = background.material.mainTextureOffset;
+				currentOffset.x += GetSpeed(EnvtLayer.Background);
+				if (currentOffset.x > 2f)
+				{
+					currentOffset.x = 0;
+				}
+				background.material.mainTextureOffset = currentOffset;
+
 
 				MoveObjects(backgroundObjects);
 			}
