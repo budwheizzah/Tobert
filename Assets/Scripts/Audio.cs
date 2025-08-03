@@ -22,7 +22,6 @@ public class Audio : MonoBehaviour
 	[SerializeField]
 	private AudioSource[] auxiliarySound; // Will use player volume
 
-
 	[SerializeField, Range(0, 1)]
 	private float masterVolume = 1f;
 
