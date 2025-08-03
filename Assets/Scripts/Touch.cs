@@ -16,7 +16,10 @@ public class Touch : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoi
 
 	public void OnPointerEnter(PointerEventData eventData)
 	{
-		touchState = true;
+		if (Input.touches.Length > 0)
+		{
+			touchState = true;
+		}
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
