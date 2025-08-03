@@ -40,6 +40,8 @@ public class Enemy : Scroller
 	private bool isDeceased = false;
 	private bool isDamaging = false;
 
+	private Damageable damageControl = new Damageable();
+
 	protected override void Start()
 	{
 		base.Start();
@@ -92,71 +94,35 @@ public class Enemy : Scroller
 			yield return new WaitForSeconds(Random.Range(soundInterval, soundInterval + intervalVariance));
 			Audio.Instance.EnemySound(sounds);
 		}
-
-		// If bitche dies, wait and then destroy (or not actually)
-		/*
-		if (Manager.Instance.gameState == Manager.GameState.Death)
-		{
-			yield return new WaitForSeconds(deathDelay);
-			Destroy(gameObject);
-		}
-		*/
 	}
 
 	public void Damage(int hit)
 	{
-		if (isDamaging)
-		{
-			return;
-		}
-
-		isDamaging = true;
-		hp -= hit;
-
-		if (hp <= 0)
-		{
-			hp = 0;
-			isDeceased = true;
-			if (deaths.Length > 0)
-			{
-				Audio.Instance.EnemySound(deaths);
-			}
-			GetComponent<BoxCollider2D>().enabled = false;
-			Manager.Instance.AddKills(1);
-		}
-		else
-		{
-			if (damages.Length > 0)
-			{
-				Audio.Instance.EnemySound(damages);
-			}
-		}
-
-		StartCoroutine(DamageRoutine());
+		hp = damageControl.Damage(hp, hit, false, Hit, Die);
+		StartCoroutine(damageControl.DamageRoutine(spriteRenderer, damageDelay, damageBlink, damageColor, Postmortem));
 	}
 
-	private IEnumerator DamageRoutine()
+	private void Hit(int reportedHp)
 	{
-		float totalTime = 0;
-		bool lastToggle = false;
-
-		while (totalTime < damageDelay)
+		if (damages.Length > 0)
 		{
-			yield return new WaitForSeconds(damageBlink);
-			if (lastToggle)
-			{
-				spriteRenderer.color = Color.white;
-			}
-			else
-			{
-				spriteRenderer.color = damageColor;
-			}
-			lastToggle = !lastToggle;
-			totalTime += damageBlink;
+			Audio.Instance.EnemySound(damages);
 		}
+	}
 
-		isDamaging = false;
+	private void Die()
+	{
+		isDeceased = true;
+		if (deaths.Length > 0)
+		{
+			Audio.Instance.EnemySound(deaths);
+		}
+		GetComponent<BoxCollider2D>().enabled = false;
+		Manager.Instance.AddKills(1);
+	}
 
+	private void Postmortem()
+	{
 		if (isDeceased)
 		{
 			Destroy(gameObject);

@@ -94,6 +94,8 @@ public class Player : MonoBehaviour
 	private bool isFiring = false;
 	private bool wasFiring = false;
 
+	private Damageable damageControl = new Damageable();
+
 	private void Awake()
 	{
 		Instance = this;
@@ -229,42 +231,6 @@ public class Player : MonoBehaviour
 		return transform.position.y + offsetVertical;
 	}
 
-	private void Damage(int hit)
-	{
-		if (isDamaging)
-		{
-			return;
-		}
-
-		isDamaging = true;
-
-		hp -= hit;
-
-		if (hp <= 0)
-		{
-			hp = 0;
-			if (audioDie.Length > 0)
-			{
-				Audio.Instance.PlayerSound(audioDie);
-			}
-			flames.SetActive(false);
-			Audio.Instance.WeaponSound();
-			spriteRenderer.sprite = deathImage;
-			onFail?.Invoke();
-			animate.isFrozen = true;
-		}
-		else
-		{
-			if (audioDamage.Length > 0)
-			{
-				Audio.Instance.PlayerSound(audioDamage);
-			}
-		}
-
-		StartCoroutine(DamageRoutine());
-		onHealth?.Invoke(hp);
-	}
-
 	private bool Heal(int value)
 	{
 		hp += value;
@@ -280,34 +246,12 @@ public class Player : MonoBehaviour
 		}
 	}
 
-	private IEnumerator DamageRoutine()
-	{
-		float totalTime = 0;
-		bool lastToggle = false;
-		while (totalTime < damageDelay)
-		{
-			yield return new WaitForSeconds(damageBlink);
-			if (lastToggle)
-			{
-				spriteRenderer.color = Color.white;
-			}
-			else
-			{
-				spriteRenderer.color = damageColor;
-			}
-			lastToggle = !lastToggle;
-			totalTime += damageBlink;
-		}
-
-		isDamaging = false;
-	}
-
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
 		Enemy enemy = collision.gameObject.GetComponent<Enemy>();
 		if (enemy != null)
 		{
-			Damage(enemy.damage);
+			hp = damageControl.Damage(hp, enemy.damage, true, Hit, Die);
 			enemy.Damage(damage);
 			return;
 		}
@@ -349,6 +293,38 @@ public class Player : MonoBehaviour
 			
 			return;
 		}
+	}
+
+	private void Hit(int reportedHp)
+	{
+		if (audioDamage.Length > 0)
+		{
+			Audio.Instance.PlayerSound(audioDamage);
+		}
+
+		CommonHitActions(reportedHp);
+	}
+
+	private void Die()
+	{
+		if (audioDie.Length > 0)
+		{
+			Audio.Instance.PlayerSound(audioDie);
+		}
+
+		flames.SetActive(false);
+		Audio.Instance.WeaponSound();
+		spriteRenderer.sprite = deathImage;
+		onFail?.Invoke();
+		animate.isFrozen = true;
+
+		CommonHitActions(0);
+	}
+
+	private void CommonHitActions(int reportedHp)
+	{
+		onHealth?.Invoke(reportedHp);
+		StartCoroutine(damageControl.DamageRoutine(spriteRenderer, damageDelay, damageBlink, damageColor));
 	}
 
 	private void OnDestroy()
