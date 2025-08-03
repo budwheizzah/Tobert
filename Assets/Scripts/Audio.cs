@@ -77,10 +77,10 @@ public class Audio : MonoBehaviour
 
 	private void Update()
 	{
+		// This is only for in-editor testing
 		if (lastMasterVolume != masterVolume)
 		{
 			UpdateVolume();
-			lastMasterVolume = masterVolume;
 		}
 	}
 
@@ -95,6 +95,7 @@ public class Audio : MonoBehaviour
 		{
 			masterVolume = 0;
 		}
+		
 		UpdateVolume();
 	}
 
@@ -121,6 +122,8 @@ public class Audio : MonoBehaviour
 		PlayerPrefs.SetFloat("volumeWeapon" + prefTag, weaponVolume);
 
 		PlayerPrefs.Save();
+
+		lastMasterVolume = masterVolume;
 
 		onUpdateVolume?.Invoke(masterVolume);
 	}

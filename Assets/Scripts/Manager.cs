@@ -125,6 +125,12 @@ public class Manager : MonoBehaviour
 	private CanvasGroup deathGroup;
 
 	[SerializeField]
+	private CanvasGroup volumeGroup;
+
+	[SerializeField]
+	private float volumeLabelShow = 3f;
+
+	[SerializeField]
 	private GameObject[] mobileControlsOverlay;
 
 	[Header("Audio")]
@@ -153,15 +159,27 @@ public class Manager : MonoBehaviour
 
 	private float speedMultiplier = 1f;
 
+	private bool mobileDetected = false;
+
+	private bool volumeIndicator = true;
+
+	private Coroutine volumeRoutine;
+
 	private void Awake()
 	{
 		if (!DetectMobile())
 		{
-			for (int x = 0; x< mobileControlsOverlay.Length; x++)
+			for (int x = 0; x < mobileControlsOverlay.Length; x++)
 			{
 				mobileControlsOverlay[x].SetActive(false);
 			}
 		}
+		else
+		{
+			mobileDetected = true;
+			volumeGroup.gameObject.SetActive(false);
+		}
+
 		titleGroup.alpha = 1;
 		gameGroup.alpha = 0;
 		deathGroup.alpha = 0;
@@ -181,6 +199,11 @@ public class Manager : MonoBehaviour
 
 	private void Start()
 	{
+		if (!mobileDetected)
+		{
+			volumeRoutine = StartCoroutine(VolumeIndicator());
+		}
+
 		gasDepleted.SetActive(false);
 		Audio.Instance.onUpdateVolume += UpdateVolume;
 		Audio.Instance.BackgroundSound(themeSong);
@@ -399,6 +422,27 @@ public class Manager : MonoBehaviour
 		{
 			vl.text = (volume * 100).ToString("0");
 		}
+		if (!mobileDetected)
+		{
+			if (volumeRoutine != null)
+			{
+				StopCoroutine(volumeRoutine);
+			}
+			volumeRoutine = StartCoroutine(VolumeIndicator());
+		}
+	}
+
+	private IEnumerator VolumeIndicator()
+	{
+		if (!volumeIndicator)
+		{
+			StartCoroutine(FadeCanvas(volumeGroup, true));
+			volumeIndicator = true;
+		}
+
+		yield return new WaitForSeconds(volumeLabelShow);
+		StartCoroutine(FadeCanvas(volumeGroup, false));
+		volumeIndicator = false;
 	}
 
 	private void AmmoDepleted()
