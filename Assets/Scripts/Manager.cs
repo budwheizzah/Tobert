@@ -161,9 +161,8 @@ public class Manager : MonoBehaviour
 
 	private bool mobileDetected = false;
 
-	private bool volumeIndicator = true;
-
 	private Coroutine volumeRoutine;
+	private Coroutine volumeFadeRoutine;
 
 	private void Awake()
 	{
@@ -428,21 +427,19 @@ public class Manager : MonoBehaviour
 			{
 				StopCoroutine(volumeRoutine);
 			}
+			if (volumeFadeRoutine != null)
+			{
+				StopCoroutine(volumeFadeRoutine);
+			}
 			volumeRoutine = StartCoroutine(VolumeIndicator());
 		}
 	}
 
 	private IEnumerator VolumeIndicator()
 	{
-		if (!volumeIndicator)
-		{
-			StartCoroutine(FadeCanvas(volumeGroup, true));
-			volumeIndicator = true;
-		}
-
+		volumeFadeRoutine = StartCoroutine(FadeCanvas(volumeGroup, true));
 		yield return new WaitForSeconds(volumeLabelShow);
-		StartCoroutine(FadeCanvas(volumeGroup, false));
-		volumeIndicator = false;
+		volumeFadeRoutine = StartCoroutine(FadeCanvas(volumeGroup, false));
 	}
 
 	private void AmmoDepleted()
