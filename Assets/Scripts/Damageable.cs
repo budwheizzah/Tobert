@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class Damageable : MonoBehaviour
+public class Damageable
 {
 	private bool isDamaging = false;
 
