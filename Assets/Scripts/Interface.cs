@@ -51,6 +51,9 @@ public class Interface : MonoBehaviour
 
 	private IEnumerator PersistentSelect(Button bs)
 	{
+		StopAutoSelect();
+		yield return null;
+
 		while (bs.gameObject.activeInHierarchy)
 		{
 			if (EventSystem.current.currentSelectedGameObject != bs.gameObject)
