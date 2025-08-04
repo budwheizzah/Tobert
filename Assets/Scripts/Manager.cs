@@ -95,6 +95,9 @@ public class Manager : MonoBehaviour
 
 	[Header("UI")]
 	[SerializeField]
+	private Interface uiControl;
+
+	[SerializeField]
 	private Button startGame;
 
 	[SerializeField]
@@ -234,6 +237,7 @@ public class Manager : MonoBehaviour
 		{
 			startGame.Select(); // Select won't work if moved after addlistener, not sure why
 			startGame.onClick.AddListener(Tutorial);
+			uiControl.SetAutoSelect(startGame);
 		}
 	}
 
@@ -263,18 +267,29 @@ public class Manager : MonoBehaviour
 
 	private void Tutorial()
 	{
+		uiControl.StopAutoSelect();
 		StartCoroutine(FadeCanvas(titleGroup, false));
 		// Add tutorial button action only after fade in, and select it for convenience
-		StartCoroutine(FadeCanvas(tutorialGroup, true, true, () => { dismissTutorial.Select(); dismissTutorial.onClick.AddListener(Launch); }));
+		StartCoroutine(FadeCanvas(tutorialGroup, true, true, TutorialReady));
+	}
+
+	private void TutorialReady()
+	{
+		dismissTutorial.Select();
+		dismissTutorial.onClick.AddListener(Launch);
+		uiControl.SetAutoSelect(dismissTutorial);
 	}
 
 	private void Launch()
 	{
+		uiControl.StopAutoSelect();
+
 		if (!skipIntro)
 		{
 			dismissTutorial.onClick.RemoveListener(Launch);
 			startGame.onClick.RemoveListener(Tutorial);
 		}
+
 		StartCoroutine(StartDelayed());
 	}
 
@@ -551,10 +566,13 @@ public class Manager : MonoBehaviour
 		StartCoroutine(FadeCanvas(deathGroup, true, true));
 		yield return null;
 		restartGame.Select();
+		uiControl.SetAutoSelect(restartGame);
 	}
 
 	private void Restart()
 	{
+		uiControl.StopAutoSelect();
+
 		//Reload game
 		skipIntro = true;
 		SceneManager.LoadScene(0);

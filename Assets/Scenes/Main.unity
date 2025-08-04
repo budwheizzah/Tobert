@@ -1600,6 +1600,7 @@ MonoBehaviour:
   - {fileID: 2230237641816451606, guid: 5c377ef2a94ea774dbe211655f4d3d80, type: 3}
   - {fileID: 1844794738124953793, guid: 575679025ab975d46bec0c826453dc1c, type: 3}
   - {fileID: 1844794738124953793, guid: 589dafe5044ea514b8d79e02520ca9f1, type: 3}
+  uiControl: {fileID: 8466562}
   startGame: {fileID: 687368457}
   restartGame: {fileID: 753709316}
   dismissTutorial: {fileID: 2085268326}
