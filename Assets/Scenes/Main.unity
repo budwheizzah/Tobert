@@ -1624,6 +1624,9 @@ MonoBehaviour:
   - {fileID: 782623246}
   themeSong: {fileID: 8300000, guid: 179bf788466aca4478ba65c3ab352fbf, type: 3}
   deathSong: {fileID: 8300000, guid: 41dd4144bb6c05f43b7ff51eb64261b0, type: 3}
+  audioDeplete:
+  - {fileID: 8300000, guid: 80fa1a84b82368646945b3b1ce7c01a6, type: 3}
+  - {fileID: 8300000, guid: bee1c3e6b11ff434dbe06a1d2867d624, type: 3}
   titleDelay: 3
   gameState: 0
   isRunning: 1

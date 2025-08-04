@@ -155,6 +155,9 @@ public class Manager : MonoBehaviour
 	[SerializeField]
 	private AudioClip deathSong;
 
+	[SerializeField]
+	private AudioClip[] audioDeplete;
+
 	[Header("Delays")]
 	[SerializeField]
 	private float titleDelay = 1;
@@ -178,6 +181,7 @@ public class Manager : MonoBehaviour
 
 	private Coroutine volumeRoutine;
 	private Coroutine volumeFadeRoutine;
+	private Coroutine gasDepletedRoutine;
 
 	private void Awake()
 	{
@@ -509,6 +513,7 @@ public class Manager : MonoBehaviour
 		gasLabel.color = Color.red;
 		if (!gasDepleted.activeSelf)
 		{
+			Audio.Instance.PlayerSound(audioDeplete);
 			StartCoroutine(DismissGasWarning());
 		}
 		gasDepleted.SetActive(true);
