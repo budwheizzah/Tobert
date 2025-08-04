@@ -95,6 +95,12 @@ public class Manager : MonoBehaviour
 
 	[Header("UI")]
 	[SerializeField]
+	private Button startGame;
+
+	[SerializeField]
+	private Button restartGame;
+
+	[SerializeField]
 	private Text gasLabel;
 
 	[SerializeField]
@@ -207,13 +213,16 @@ public class Manager : MonoBehaviour
 		Audio.Instance.onUpdateVolume += UpdateVolume;
 		Audio.Instance.BackgroundSound(themeSong);
 
+		startGame.onClick.AddListener(Launch);
+		restartGame.onClick.AddListener(Restart);
+		startGame.Select();
+
 		if (skipIntro)
 		{
 			titleGroup.alpha = 0;
 			gameGroup.alpha = 1;
+			Launch();
 		}
-
-		StartCoroutine(StartDelayed());
 	}
 
 	private void Update()
@@ -240,17 +249,26 @@ public class Manager : MonoBehaviour
 		dodgesLabel.text = dodges.ToString();
 	}
 
+	private void Launch()
+	{
+		StartCoroutine(StartDelayed());
+		startGame.onClick.RemoveListener(Launch);
+	}
+
 	private IEnumerator StartDelayed()
 	{
 		if (!skipIntro)
 		{
+			/*
+			 * gonna auto select the start button so this won't be needed anymore
 			while ((!Input.anyKey) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
 			{
 				yield return null;
 			}
+			*/
 
 			StartCoroutine(FadeCanvas(titleGroup, false));
-			StartCoroutine(FadeCanvas(gameGroup, true));
+			StartCoroutine(FadeCanvas(gameGroup, true, true));
 		}
 
 		yield return new WaitForSeconds(titleDelay);
@@ -413,6 +431,7 @@ public class Manager : MonoBehaviour
 		bitche.onHealth -= PlayerHealth;
 		bitche.onFail -= PlayerFail;
 		Audio.Instance.onUpdateVolume -= UpdateVolume;
+		restartGame.onClick.RemoveListener(Restart);
 	}
 
 	private void UpdateVolume(float volume)
@@ -519,13 +538,17 @@ public class Manager : MonoBehaviour
 
 		yield return new WaitForSeconds(titleDelay);
 
-		StartCoroutine(FadeCanvas(deathGroup, true));
-
+		StartCoroutine(FadeCanvas(deathGroup, true, true));
+		/*
 		while (!Input.anyKey)
 		{
 			yield return null;
 		}
+		*/
+	}
 
+	private void Restart()
+	{
 		//Reload game
 		skipIntro = true;
 		SceneManager.LoadScene(0);
@@ -549,12 +572,19 @@ public class Manager : MonoBehaviour
 	}
 
 
-	private IEnumerator FadeCanvas(CanvasGroup cg, bool show)
+	private IEnumerator FadeCanvas(CanvasGroup cg, bool show, bool inter = false)
 	{
 		float incr = fadeRate;
 		if (!show)
 		{
 			incr = -incr;
+			cg.interactable = false;
+			cg.blocksRaycasts = false;
+		}
+		else
+		{
+			cg.interactable = inter;
+			cg.blocksRaycasts = inter;
 		}
 
 		float ca = cg.alpha + (incr * Time.deltaTime);
