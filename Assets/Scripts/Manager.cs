@@ -101,6 +101,9 @@ public class Manager : MonoBehaviour
 	private Button restartGame;
 
 	[SerializeField]
+	private Button dismissTutorial;
+
+	[SerializeField]
 	private Text gasLabel;
 
 	[SerializeField]
@@ -120,6 +123,9 @@ public class Manager : MonoBehaviour
 
 	[SerializeField]
 	private Healthbar healthBar;
+
+	[SerializeField]
+	private CanvasGroup tutorialGroup;
 
 	[SerializeField]
 	private CanvasGroup gameGroup;
@@ -188,6 +194,7 @@ public class Manager : MonoBehaviour
 		titleGroup.alpha = 1;
 		gameGroup.alpha = 0;
 		deathGroup.alpha = 0;
+		tutorialGroup.alpha = 0;
 
 		pipebomb.SetActive(false);
 
@@ -213,7 +220,6 @@ public class Manager : MonoBehaviour
 		Audio.Instance.onUpdateVolume += UpdateVolume;
 		Audio.Instance.BackgroundSound(themeSong);
 
-		startGame.onClick.AddListener(Launch);
 		restartGame.onClick.AddListener(Restart);
 		startGame.Select();
 
@@ -221,7 +227,13 @@ public class Manager : MonoBehaviour
 		{
 			titleGroup.alpha = 0;
 			gameGroup.alpha = 1;
+			gameGroup.blocksRaycasts = true;
+			gameGroup.interactable = true;
 			Launch();
+		}
+		else
+		{
+			startGame.onClick.AddListener(Tutorial);
 		}
 	}
 
@@ -249,10 +261,21 @@ public class Manager : MonoBehaviour
 		dodgesLabel.text = dodges.ToString();
 	}
 
+	private void Tutorial()
+	{
+		StartCoroutine(FadeCanvas(titleGroup, false));
+		// Add tutorial button action only after fade in, and select it for convenience
+		StartCoroutine(FadeCanvas(tutorialGroup, true, true, () => { dismissTutorial.onClick.AddListener(Launch);dismissTutorial.Select(); }));
+	}
+
 	private void Launch()
 	{
+		if (!skipIntro)
+		{
+			dismissTutorial.onClick.RemoveListener(Launch);
+			startGame.onClick.RemoveListener(Tutorial);
+		}
 		StartCoroutine(StartDelayed());
-		startGame.onClick.RemoveListener(Launch);
 	}
 
 	private IEnumerator StartDelayed()
@@ -267,7 +290,7 @@ public class Manager : MonoBehaviour
 			}
 			*/
 
-			StartCoroutine(FadeCanvas(titleGroup, false));
+			StartCoroutine(FadeCanvas(tutorialGroup, false));
 			StartCoroutine(FadeCanvas(gameGroup, true, true));
 		}
 
@@ -535,10 +558,11 @@ public class Manager : MonoBehaviour
 	private IEnumerator Die()
 	{
 		//StartCoroutine(FadeCanvas(gameGroup, false));
-
 		yield return new WaitForSeconds(titleDelay);
 
 		StartCoroutine(FadeCanvas(deathGroup, true, true));
+		yield return null;
+		restartGame.Select();
 		/*
 		while (!Input.anyKey)
 		{
@@ -572,7 +596,7 @@ public class Manager : MonoBehaviour
 	}
 
 
-	private IEnumerator FadeCanvas(CanvasGroup cg, bool show, bool inter = false)
+	private IEnumerator FadeCanvas(CanvasGroup cg, bool show, bool inter = false, Action onComplete = null)
 	{
 		float incr = fadeRate;
 		if (!show)
@@ -602,6 +626,8 @@ public class Manager : MonoBehaviour
 			cg.alpha = ca;
 			yield return null;
 		}
+
+		onComplete?.Invoke();
 	}
 
 	private bool DetectMobile()
