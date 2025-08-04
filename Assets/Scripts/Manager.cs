@@ -315,19 +315,26 @@ public class Manager : MonoBehaviour
 
 	private void MoveObjects(List<GameObject> move)
 	{
-		for (int x=0; x< move.Count; x++)
+		for (int x = 0; x < move.Count; x++)
 		{
 			GameObject bgo = move[x];
 			Vector2 tmpPos = bgo.transform.position;
 			tmpPos.x -= GetSpeed(EnvtLayer.Midground);
 			bgo.transform.position = tmpPos;
-			if (tmpPos.x <= spawnMinimumX)
+		}
+	}
+
+	private List<GameObject> CleanObjects(List<GameObject> move)
+	{
+		for (int x = 0; x < move.Count; x++)
+		{
+			if ((move[x] != null) && (move[x].transform.position.x <= spawnMinimumX))
 			{
+				Destroy(move[x]);
 				move.RemoveAt(x);
-				Destroy(bgo);
-				break;
 			}
 		}
+		return move;
 	}
 
 	private IEnumerator ScrollBackground()
@@ -352,7 +359,7 @@ public class Manager : MonoBehaviour
 				}
 				background.material.mainTextureOffset = currentOffset;
 
-
+				backgroundObjects = CleanObjects(backgroundObjects);
 				MoveObjects(backgroundObjects);
 			}
 			yield return null;
