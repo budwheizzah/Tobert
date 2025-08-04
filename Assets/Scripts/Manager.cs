@@ -232,8 +232,8 @@ public class Manager : MonoBehaviour
 		}
 		else
 		{
+			startGame.Select(); // Select won't work if moved after addlistener, not sure why
 			startGame.onClick.AddListener(Tutorial);
-			startGame.Select();
 		}
 	}
 
@@ -265,7 +265,7 @@ public class Manager : MonoBehaviour
 	{
 		StartCoroutine(FadeCanvas(titleGroup, false));
 		// Add tutorial button action only after fade in, and select it for convenience
-		StartCoroutine(FadeCanvas(tutorialGroup, true, true, () => { dismissTutorial.onClick.AddListener(Launch);dismissTutorial.Select(); }));
+		StartCoroutine(FadeCanvas(tutorialGroup, true, true, () => { dismissTutorial.Select(); dismissTutorial.onClick.AddListener(Launch); }));
 	}
 
 	private void Launch()
