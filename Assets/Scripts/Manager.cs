@@ -221,7 +221,6 @@ public class Manager : MonoBehaviour
 		Audio.Instance.BackgroundSound(themeSong);
 
 		restartGame.onClick.AddListener(Restart);
-		startGame.Select();
 
 		if (skipIntro)
 		{
@@ -234,6 +233,7 @@ public class Manager : MonoBehaviour
 		else
 		{
 			startGame.onClick.AddListener(Tutorial);
+			startGame.Select();
 		}
 	}
 
@@ -282,14 +282,6 @@ public class Manager : MonoBehaviour
 	{
 		if (!skipIntro)
 		{
-			/*
-			 * gonna auto select the start button so this won't be needed anymore
-			while ((!Input.anyKey) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
-			{
-				yield return null;
-			}
-			*/
-
 			StartCoroutine(FadeCanvas(tutorialGroup, false));
 			StartCoroutine(FadeCanvas(gameGroup, true, true));
 		}
@@ -486,7 +478,6 @@ public class Manager : MonoBehaviour
 
 	private void AmmoDepleted()
 	{
-		//Debug.LogError("AMMO DEPLETED!");
 		gasLabel.color = Color.red;
 		if (!gasDepleted.activeSelf)
 		{
@@ -497,13 +488,11 @@ public class Manager : MonoBehaviour
 
 	private void AmmoConsume(float amount)
 	{
-		//Debug.LogError("AMMO LEFT " + amount);
 		gasLabel.text = Mathf.Floor(amount).ToString("0");
 	}
 
 	private void AmmoReplenish()
 	{
-		//Debug.LogError("AMMO GIVE " + amount);
 		gasLabel.color = Color.black;
 	}
 
@@ -557,18 +546,11 @@ public class Manager : MonoBehaviour
 
 	private IEnumerator Die()
 	{
-		//StartCoroutine(FadeCanvas(gameGroup, false));
 		yield return new WaitForSeconds(titleDelay);
 
 		StartCoroutine(FadeCanvas(deathGroup, true, true));
 		yield return null;
 		restartGame.Select();
-		/*
-		while (!Input.anyKey)
-		{
-			yield return null;
-		}
-		*/
 	}
 
 	private void Restart()
