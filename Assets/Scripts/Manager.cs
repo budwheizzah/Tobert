@@ -366,7 +366,9 @@ public class Manager : MonoBehaviour
 			if (gameState == GameState.Playing)
 			{
 				float waitTime = UnityEngine.Random.Range(spawnBgRate, spawnBgRate + spawnBgVariance);
-				yield return new WaitForSeconds(waitTime);
+
+				// Multiply the wait time by the inversed speed multiplier to slow spawn when rate is reduced
+				yield return new WaitForSeconds(waitTime * (1f / GetSpeed(EnvtLayer.MultiplierOnly)));
 
 				int spawnIndex = UnityEngine.Random.Range(0, trees.Length);
 				Vector3 spawnPosition = backgroundSpawn.transform.position;
@@ -385,7 +387,9 @@ public class Manager : MonoBehaviour
 			if (gameState == GameState.Playing)
 			{
 				float waitTime = UnityEngine.Random.Range(spawnEnRate, spawnEnRate + spawnEnVariance);
-				yield return new WaitForSeconds(waitTime);
+
+				// Multiply the wait time by the inversed speed multiplier to slow spawn when rate is reduced
+				yield return new WaitForSeconds(waitTime * (1f / GetSpeed(EnvtLayer.MultiplierOnly)));
 
 				int spawnIndex = UnityEngine.Random.Range(0, enemies.Length);
 				Enemy e = enemies[spawnIndex].GetComponent<Enemy>();
@@ -411,6 +415,8 @@ public class Manager : MonoBehaviour
 			if (gameState == GameState.Playing)
 			{
 				float waitTime = UnityEngine.Random.Range(spawnItemRate, spawnItemRate + spawnItemVariance);
+
+				// Items won't slow spawn when rate is lowered, so wait the normal time always
 				yield return new WaitForSeconds(waitTime);
 
 				int spawnIndex = UnityEngine.Random.Range(0, items.Length);
