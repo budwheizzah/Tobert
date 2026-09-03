@@ -533,8 +533,8 @@ MonoBehaviour:
   spawnBgVariance: 4
   spawnBgHeightVariance: 0.1
   spawnMinimumX: -10
-  spawnEnRate: 0.8
-  spawnEnVariance: 4
+  spawnEnRate: 0.5
+  spawnEnVariance: 3
   spawnItemRate: 5
   spawnItemVariance: 5
   slowdownRate: 0.3
