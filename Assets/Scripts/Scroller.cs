@@ -60,19 +60,21 @@ public class Scroller : MonoBehaviour
 				}
 			}
 
-			float layerThreshold = Player.Instance.GetVertical();
-			float layerCompare = transform.position.y;
-			if ((layerCompare > layerThreshold) && (localLayer != LocalLayer.Behind))// This means we are BEHIND bitche
+			if (!Manager.Instance.is3D)
 			{
-				localLayer = LocalLayer.Behind;
-				SetLayer(bitcheBehind);
+				float layerThreshold = Player.Instance.GetVertical();
+				float layerCompare = transform.position.y;
+				if ((layerCompare > layerThreshold) && (localLayer != LocalLayer.Behind))// This means we are BEHIND bitche
+				{
+					localLayer = LocalLayer.Behind;
+					SetLayer(bitcheBehind);
+				}
+				else if ((layerCompare <= layerThreshold) && (localLayer != LocalLayer.Front)) // Front of bitche
+				{
+					localLayer = LocalLayer.Front;
+					SetLayer(bitcheFront);
+				}
 			}
-			else if ((layerCompare <= layerThreshold) && (localLayer != LocalLayer.Front)) // Front of bitche
-			{
-				localLayer = LocalLayer.Front;
-				SetLayer(bitcheFront);
-			}
-
 			yield return null;
 		}
 	}

@@ -2,14 +2,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+
 
 public class Manager : MonoBehaviour
 {
 	[DllImport("__Internal")]
 	private static extern bool IsMobile();
+
+	private const float DEFAULT_3D_ITEM_HEIGHT = 0.35f;
+	private const float DEFAULT_3D_ENEMY_HEIGHT = 1.25f;
 
 	public static Manager Instance;
 	public static bool skipIntro = false;
@@ -21,7 +26,7 @@ public class Manager : MonoBehaviour
 
 	[Header("Speeds")]
 	[SerializeField]
-	private float currentSpeed = 0;
+	private float currentSpeed = 1; // Defaulting this to 0 will murder innocent puppies
 
 	[SerializeField]
 	private float backgroundRate = 0.2f; // This is a strange offset to position conversion, so number shall vary
@@ -31,6 +36,9 @@ public class Manager : MonoBehaviour
 
 	[SerializeField]
 	private float foregroundRate = 6f; // enemies and such
+
+	[SerializeField]
+	public bool is3D=false;
 
 	[Header("Background Rates")]
 	[SerializeField]
@@ -68,10 +76,13 @@ public class Manager : MonoBehaviour
 
 	[Header("Elements")]
 	[SerializeField]
-	private SpriteRenderer background;
+	private Renderer background;
 
 	[SerializeField]
-	private SpriteRenderer road;
+	private Renderer ground;
+
+	[SerializeField]
+	private Renderer road;
 
 	[SerializeField]
 	private GameObject pipebomb;
@@ -322,7 +333,7 @@ public class Manager : MonoBehaviour
 		for (int x = 0; x < move.Count; x++)
 		{
 			GameObject bgo = move[x];
-			Vector2 tmpPos = bgo.transform.position;
+			Vector3 tmpPos = bgo.transform.position;
 			tmpPos.x -= GetSpeed(EnvtLayer.Midground);
 			bgo.transform.position = tmpPos;
 		}
@@ -363,6 +374,10 @@ public class Manager : MonoBehaviour
 				}
 				background.material.mainTextureOffset = currentOffset;
 
+				OffsetIterate(road, EnvtLayer.Road);
+				OffsetIterate(ground, EnvtLayer.Road);
+				OffsetIterate(background, EnvtLayer.Background);
+
 				backgroundObjects = CleanObjects(backgroundObjects);
 				MoveObjects(backgroundObjects);
 			}
@@ -370,9 +385,20 @@ public class Manager : MonoBehaviour
 		}
 	}
 
+	private void OffsetIterate(Renderer subject, EnvtLayer layer)
+	{
+		Vector2 currentOffset = subject.material.mainTextureOffset;
+		currentOffset.x += GetSpeed(layer);
+		if (currentOffset.x > 2f)
+		{
+			currentOffset.x = 0;
+		}
+		subject.material.mainTextureOffset = currentOffset;
+	}
+
 	private IEnumerator SpawnBackground()
 	{
-		while (isRunning)
+		while ((isRunning) && (trees.Length > 0))
 		{
 			if (gameState == GameState.Playing)
 			{
@@ -383,7 +409,15 @@ public class Manager : MonoBehaviour
 
 				int spawnIndex = UnityEngine.Random.Range(0, trees.Length);
 				Vector3 spawnPosition = backgroundSpawn.transform.position;
-				spawnPosition.y = UnityEngine.Random.Range(spawnPosition.y, spawnPosition.y + spawnBgHeightVariance);
+				if (is3D)
+				{
+					spawnPosition.z = UnityEngine.Random.Range(spawnPosition.z, spawnPosition.z + spawnBgHeightVariance);
+				}
+				else
+				{
+					spawnPosition.y = UnityEngine.Random.Range(spawnPosition.y, spawnPosition.y + spawnBgHeightVariance);
+				}
+					
 				GameObject tree = Instantiate(trees[spawnIndex], spawnPosition, backgroundSpawn.transform.rotation);
 				backgroundObjects.Add(tree);
 			}
@@ -393,7 +427,7 @@ public class Manager : MonoBehaviour
 
 	private IEnumerator SpawnEnemies()
 	{
-		while (isRunning)
+		while ((isRunning) && (enemies.Length > 0))
 		{
 			if (gameState == GameState.Playing)
 			{
@@ -406,9 +440,9 @@ public class Manager : MonoBehaviour
 				Enemy e = enemies[spawnIndex].GetComponent<Enemy>();
 				if (e != null)
 				{
-					Vector3 spawnPosition = new Vector3(e.spawnHorizontal, UnityEngine.Random.Range(e.spawnLowest, e.spawnLowest + e.spawnHeight), e.bitcheBehind);
-					spawnPosition.y = UnityEngine.Random.Range(spawnPosition.y, spawnPosition.y);
+					Vector3 spawnPosition = is3D ? new Vector3(e.spawnHorizontal, DEFAULT_3D_ENEMY_HEIGHT, UnityEngine.Random.Range(e.spawnLowest, e.spawnLowest + e.spawnHeight)) : new Vector3(e.spawnHorizontal, UnityEngine.Random.Range(e.spawnLowest, e.spawnLowest + e.spawnHeight), e.bitcheBehind);
 					GameObject enemy = Instantiate(enemies[spawnIndex], spawnPosition, backgroundSpawn.transform.rotation);
+					//enemy.transform.position = spawnPosition;
 				}
 				else
 				{
@@ -421,7 +455,7 @@ public class Manager : MonoBehaviour
 
 	private IEnumerator SpawnItems()
 	{
-		while (isRunning)
+		while ((isRunning) && (items.Length > 0))
 		{
 			if (gameState == GameState.Playing)
 			{
@@ -434,8 +468,9 @@ public class Manager : MonoBehaviour
 				Pickup pu = items[spawnIndex].GetComponent<Pickup>();
 				if (pu != null)
 				{
-					Vector3 spawnPosition = new Vector3(pu.spawnHorizontal, UnityEngine.Random.Range(pu.spawnLowest, pu.spawnLowest + pu.spawnHeight), pu.bitcheBehind);
-					spawnPosition.y = UnityEngine.Random.Range(spawnPosition.y, spawnPosition.y);
+					//Vector3 spawnPosition = new Vector3(pu.spawnHorizontal, UnityEngine.Random.Range(pu.spawnLowest, pu.spawnLowest + pu.spawnHeight), pu.bitcheBehind);
+					Vector3 spawnPosition = is3D ? new Vector3(pu.spawnHorizontal, DEFAULT_3D_ITEM_HEIGHT, UnityEngine.Random.Range(pu.spawnLowest, pu.spawnLowest + pu.spawnHeight)) : new Vector3(pu.spawnHorizontal, UnityEngine.Random.Range(pu.spawnLowest, pu.spawnLowest + pu.spawnHeight), pu.bitcheBehind);
+					//spawnPosition.y = UnityEngine.Random.Range(spawnPosition.y, spawnPosition.y);
 					GameObject item = Instantiate(items[spawnIndex], spawnPosition, backgroundSpawn.transform.rotation);
 				}
 				else

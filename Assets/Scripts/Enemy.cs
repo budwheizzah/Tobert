@@ -30,6 +30,9 @@ public class Enemy : Scroller
 	[SerializeField]
 	private float trackingRate = 1f;
 
+	[SerializeField]
+	private float floor = 0.75f;
+
 	public AudioClip[] sounds;
 	public AudioClip[] damages;
 	public AudioClip[] deaths;
@@ -47,7 +50,7 @@ public class Enemy : Scroller
 		base.Start();
 
 		onOverflow += OnDodged;
-
+		
 		float trackingDraw = Random.Range(0,1);
 		if (trackingDraw <= trackingProbability)
 		{
@@ -65,24 +68,58 @@ public class Enemy : Scroller
 		while (!isDeceased)
 		{
 			if (Manager.Instance.gameState == Manager.GameState.Playing) 
-			{ 
-				if (transform.position.y < Player.Instance.gameObject.transform.position.y)
+			{
+				float referencePosition = transform.position.y;
+				float playerPosition = Player.Instance.gameObject.transform.position.y;
+
+				if (referencePosition < playerPosition)
 				{
-					MoveY(trackingRate);
+					MoveByFlat(trackingRate);
 				}
-				else if (transform.position.y > Player.Instance.gameObject.transform.position.y)
+				else if (referencePosition > playerPosition)
 				{
-					MoveY(-trackingRate);
+					MoveByFlat(-trackingRate);
 				}
+
+				if (Manager.Instance.is3D)
+				{
+					referencePosition = transform.position.z;
+					playerPosition = Player.Instance.gameObject.transform.position.z;
+
+					if (referencePosition < playerPosition)
+					{
+						MoveByDepth(trackingRate);
+					}
+					else if (referencePosition > playerPosition)
+					{
+						MoveByDepth(-trackingRate);
+					}
+				}
+
 			}
 			yield return null;
 		}
 	}
 
-	private void MoveY(float value)
+	private void MoveByFlat(float value)
 	{
 		Vector3 tmpPos = transform.position;
-		tmpPos.y += value * Time.deltaTime;
+		float nextValue = tmpPos.y + (value * Time.deltaTime);
+		if (floor < nextValue)
+		{ 
+			tmpPos.y = nextValue;
+		}
+		else
+		{
+			tmpPos.y = floor;
+		}
+		transform.position = tmpPos;
+	}
+
+	private void MoveByDepth(float value)
+	{
+		Vector3 tmpPos = transform.position;
+		tmpPos.z += value * Time.deltaTime;
 		transform.position = tmpPos;
 	}
 
@@ -117,7 +154,7 @@ public class Enemy : Scroller
 		{
 			Audio.Instance.EnemySound(deaths);
 		}
-		GetComponent<BoxCollider2D>().enabled = false;
+		GetComponent<BoxCollider>().enabled = false;
 		Manager.Instance.AddKills(1);
 	}
 

@@ -40,6 +40,9 @@ public class Player : MonoBehaviour
 	[SerializeField,Range(1f,9f)]
 	private float moveRate = 3f;
 
+	[SerializeField,Tooltip("Move laterally on the Z axis (For 3D)")]
+	private bool moveZ = false;
+
 	[Header("Gasoline and rate")]
 	[SerializeField]
 	private float gas = 50f;
@@ -79,7 +82,9 @@ public class Player : MonoBehaviour
 	[SerializeField,Tooltip("Offset to apply when reporting Y position to other scripts through GetVertical()")]
 	private float offsetVertical = -1f;
 
+	[SerializeField]
 	private float vertical = -1.7f;
+	[SerializeField]
 	private float horizontal = -4f;
 
 	public Action onOutOfGas;
@@ -196,7 +201,14 @@ public class Player : MonoBehaviour
 	private void MoveTo(float vertical, float horizontal)
 	{
 		Vector3 tempPos = transform.position;
-		tempPos.y = vertical;
+		if (moveZ)
+		{
+			tempPos.z = vertical;
+		}
+		else
+		{
+			tempPos.y = vertical;
+		}
 		tempPos.x = horizontal;
 		transform.position = tempPos;
 	}
@@ -246,7 +258,7 @@ public class Player : MonoBehaviour
 		}
 	}
 
-	private void OnTriggerEnter2D(Collider2D collision)
+	private void OnTriggerEnter(Collider collision)
 	{
 		Enemy enemy = collision.gameObject.GetComponent<Enemy>();
 		if (enemy != null)
