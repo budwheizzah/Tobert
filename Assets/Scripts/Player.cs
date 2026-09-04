@@ -69,6 +69,12 @@ public class Player : MonoBehaviour
 	private AudioClip[] audioReplenish;
 
 	[SerializeField]
+	private AudioClip[] audioHealth;
+
+	[SerializeField]
+	private AudioClip[] audioSlow;
+
+	[SerializeField]
 	private AudioClip[] audioPipebomb;
 
 	[SerializeField]
@@ -275,31 +281,41 @@ public class Player : MonoBehaviour
 			switch (item.pickupType)
 			{
 				case Pickup.PickupType.Slowdown:
+					if (audioSlow.Length > 0)
+					{
+						Audio.Instance.AuxiliarySound(audioSlow);
+					}
 					Manager.Instance.TimedPickup(item.pickupType, item.value);
 					break;
+
 				case Pickup.PickupType.Gas:
+					if (audioReplenish.Length > 0)
+					{
+						Audio.Instance.AuxiliarySound(audioReplenish);
+					}
 					Replenish(item.value);
 					break;
+
 				case Pickup.PickupType.Health:
 					// Health can be maxed
 					collectedPickup = Heal(item.value);
+					if ((collectedPickup) && (audioHealth.Length > 0))
+					{
+							Audio.Instance.PlayerSound(audioHealth);
+					}
 					break;
+
 				case Pickup.PickupType.Pipebomb:
 					if (audioPipebomb.Length > 0)
 					{
 						Audio.Instance.AuxiliarySound(audioPipebomb);
 					}
-
 					StartCoroutine(Manager.Instance.FirePipebomb(item.value));
 					break;
 			}
 
 			if (collectedPickup)
 			{
-				if (audioReplenish.Length > 0)
-				{
-					Audio.Instance.AuxiliarySound(audioReplenish);
-				}
 				Destroy(item.gameObject);
 			}
 			

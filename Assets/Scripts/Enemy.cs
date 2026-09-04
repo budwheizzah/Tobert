@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class Enemy : Scroller
 {
+	private const float TRACKING_DEADZONE = 0.02f;
+
 	[SerializeField]
 	private SpriteRenderer spriteRenderer;
 
@@ -69,14 +71,16 @@ public class Enemy : Scroller
 		{
 			if (Manager.Instance.gameState == Manager.GameState.Playing) 
 			{
+				//TRACKING_DEADZONE
 				float referencePosition = transform.position.y;
 				float playerPosition = Player.Instance.gameObject.transform.position.y;
+				float referenceDelta = Mathf.Abs(Player.Instance.gameObject.transform.position.y - transform.position.y);
 
-				if (referencePosition < playerPosition)
+				if ((referencePosition < playerPosition) && (referenceDelta >= TRACKING_DEADZONE))
 				{
 					MoveByFlat(trackingRate);
 				}
-				else if (referencePosition > playerPosition)
+				else if ((referencePosition > playerPosition) && (referenceDelta >= TRACKING_DEADZONE))
 				{
 					MoveByFlat(-trackingRate);
 				}
@@ -85,12 +89,13 @@ public class Enemy : Scroller
 				{
 					referencePosition = transform.position.z;
 					playerPosition = Player.Instance.gameObject.transform.position.z;
+					referenceDelta = Mathf.Abs(Player.Instance.gameObject.transform.position.z - transform.position.z);
 
-					if (referencePosition < playerPosition)
+					if ((referencePosition < playerPosition) && (referenceDelta >= TRACKING_DEADZONE))
 					{
 						MoveByDepth(trackingRate);
 					}
-					else if (referencePosition > playerPosition)
+					else if ((referencePosition > playerPosition) && (referenceDelta >= TRACKING_DEADZONE))
 					{
 						MoveByDepth(-trackingRate);
 					}
